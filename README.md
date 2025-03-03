@@ -5,4 +5,4 @@ Firstly gonna initialise the bot and setup some basic commands and functionality
 
 Implemented response with gemini
 
-Now implementing ai summarising command
+Implemented summarize command
