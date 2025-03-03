@@ -36,6 +36,24 @@ class Client(commands.Bot):
         except Exception as e:
             await interaction.response.send_message("Error processing request. Try again later.", ephemeral=True)
             print(f"Error: {e}")
+    
+    async def summarize(self, interaction: discord.Interaction, query: str):
+        try:
+            if not query:
+                await interaction.response.send_message("Please provide a text to summarize!", ephemeral=True)
+                return
+            prompt = f"Summarize the following text in under 2000 characters:\n\n{query}"
+            response = model.generate_content(prompt)
+            summary = response.text if hasattr(response, "text") else "I couldn't generate a summary"
+            
+            if len(summary) > 2000:
+                summary = summary[:1997] + "..."
+
+            await interaction.response.send_message(summary)
+        
+        except Exception as e:
+            await interaction.response.send_message("Error processing request. Try again later.", ephemeral=True)
+            print(f"Error: {e}")
 
 
 intents = discord.Intents.default()
@@ -43,11 +61,15 @@ intents.message_content = True
 
 client = Client(command_prefix='!', intents=intents)
 
-@client.tree.command(name='respond', description="Generate message response with gemini")
+@client.tree.command(name='respond', description="generate message response with gemini")
 @app_commands.describe(query="Your question for the AI")
 async def respond(interaction: discord.Interaction, query: str):
     await client.respond_with_gemini(interaction, query)
 
+@client.tree.command(name='summarize', description="Summarize your text with gemini")
+@app_commands.describe(query="Your question for the AI")
+async def respond(interaction: discord.Interaction, query: str):
+    await client.respond_with_gemini(interaction, query)
 
 client.run('your-discord-bot-token') #insert token here
 
