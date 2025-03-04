@@ -8,3 +8,5 @@ Implemented response with gemini
 Implemented summarize command
 
 Implemented the welcome message (with embedded)
+
+Implemented the poll command (not more than 2 options yet thanks to crampness in the file, will fix it later)
