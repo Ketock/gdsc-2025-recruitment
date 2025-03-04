@@ -13,6 +13,8 @@ model = genai.GenerativeModel("gemini-pro")
 WELCOME_MESSAGE = 'Wsg bruh {member}, have fun'
 WELCOME_GIF_URL = 'https://i.gifer.com/7Jg9.gif'
 
+NUMBER_EMOJIS = ["1️⃣", "2️⃣",]
+
 class Client(commands.Bot):
     async def on_ready(self):  #sending the green flag to terminal about bot coming online
         print(f'Logged as {self.user}')
@@ -73,6 +75,28 @@ class Client(commands.Bot):
             await interaction.response.send_message("Error processing request. Try again later.", ephemeral=True)
             print(f"Error: {e}")
 
+    async def poll(self, interaction: discord.Interaction, content:str, option1:str, option2:str):
+        
+        options = [option1,option2]
+        options = [option for option in options if option]
+
+        if len(options) < 2:
+            await interaction.response.send_message("Can't create a poll with less than 2 option", ephemeral=True)
+            return
+        embed = discord.Embed(title="Poll", description=f"**{content}**", color=discord.Colour.blue())
+        poll_message = ""
+        for i, option in enumerate(options):
+            poll_message += f"{NUMBER_EMOJIS[i]} **{option}**\n"
+        
+        embed.add_field(name="Options", value=poll_message, inline=False)
+        embed.set_footer(text=f"Poll created by {interaction.user.name}")
+
+        await interaction.response.send_message(embed=embed)
+        poll_msg =  await interaction.original_response()
+
+        for i in range(len(options)):
+            await poll_msg.add_reaction(NUMBER_EMOJIS[i])
+
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -89,6 +113,10 @@ async def respond(interaction: discord.Interaction, query: str):
 @app_commands.describe(query="Your question for the AI")
 async def respond(interaction: discord.Interaction, query: str):
     await client.respond_with_gemini(interaction, query)
+
+@client.tree.command(name='poll', description='create poll')
+async def respond(interaction: discord.Interaction, question:str, option1:str, option2:str):
+    await client.poll(interaction,question,option1,option2)
 
 client.run('your-discord-bot-token') #insert token here
 
