@@ -10,14 +10,32 @@ GEMINI_API_KEY = "your-gemini-api-key-here"
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-pro") 
 
+WELCOME_MESSAGE = 'Wsg bruh {member}, have fun'
+WELCOME_GIF_URL = 'https://i.gifer.com/7Jg9.gif'
+
 class Client(commands.Bot):
     async def on_ready(self):  #sending the green flag to terminal about bot coming online
         print(f'Logged as {self.user}')
         try:
-            synced = await self.tree.sync()  # Syncing slash commands
+            await self.tree.sync()  # Syncing slash commands
             print(f"Slash commands synced successfully")
         except Exception as e:
             print(f"Failed to sync commands: {e}")
+
+
+    async def on_member_join(self, member):    
+        channel = discord.utils.get(member.guild.text_channels, name="general")  # sub the name to the channel you want to deliver the welcome message at (will update this later)
+        if channel:
+            embed = discord.Embed(
+                title="Yo",
+                description=WELCOME_MESSAGE.format(member=member.mention),
+                color=discord.Color.blue()
+            )
+            embed.set_image(url=WELCOME_GIF_URL) 
+            await channel.send(embed=embed)
+    
+    async def hello(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Hello")
 
     async def respond_with_gemini(self, interaction: discord.Interaction, query: str):
         try:
@@ -58,6 +76,7 @@ class Client(commands.Bot):
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 client = Client(command_prefix='!', intents=intents)
 
