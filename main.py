@@ -1,8 +1,10 @@
 import discord
-from discord.ext import commands
+from discord.ext import commands,tasks
 from discord import app_commands
 import asyncio
 import google.generativeai as genai
+import yt_dlp
+from datetime import datetime, timedelta
 
 
 # Configure Gemini API
