@@ -97,6 +97,42 @@ class Client(commands.Bot):
         for i in range(len(options)):
             await poll_msg.add_reaction(NUMBER_EMOJIS[i])
 
+    def get_guild_queue(self, guild_id):
+        if guild_id not in SONG_QUEUE:
+            SONG_QUEUE[guild_id] = []
+        return SONG_QUEUE[guild_id]
+    
+    async def queue(self, interaction: discord.Interaction):
+        queue = get_guild_queue(interaction.guild.id)
+
+        if not queue:
+            await interaction.response.send_message("Empty queue lmfao", ephemeral=True)
+            return
+        embed = discord.embed(title = "Song Queue", colour=discord.Colour.red())
+        queue_text = "\n".join([f"**{i+1}.** {song}" for i,song in enumerate(queue)])
+        embed.add_field(name="Current Songs:",value=queue_text,inline = False)
+        await interaction.response.send_message(embed=embed)
+
+    async def queue_add(self, interaction: discord.Interaction, song: str):
+        queue = get_guild_queue(interaction.guild.id)
+        queue.append(song)
+        await interaction.response.send_message(f"Added **{song}** to the queue")
+
+    async def queue_remove(self, interaction: discord.Interaction, position: int):
+        queue = get_guild_queue(interaction.guild.id)
+        if position < 1 or position > len(queue):
+            await interaction.response.send_message(f"Invalid Song position", ephemeral=True)
+            return
+        removed_song=queue.pop(position-1)
+        await interaction.response.send_message(f"Removed **{removed_song}** from the queue")
+    
+    async def queue_clear(self, interaction: discord.Interaction):
+        queue = get_guild_queue(interaction.guild.id)
+        if queue == []:
+            await interaction.response.send_message(f"There is nothing in the queue!", ephemeral=True)
+            return
+        queue = []
+        await interaction.response.send_message(f"The queue has been **cleared**")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -111,12 +147,28 @@ async def respond(interaction: discord.Interaction, query: str):
 
 @client.tree.command(name='summarize', description="Summarize your text with gemini")
 @app_commands.describe(query="Your question for the AI")
-async def respond(interaction: discord.Interaction, query: str):
-    await client.respond_with_gemini(interaction, query)
+async def summarize(interaction: discord.Interaction, query: str):
+    await client.summarize(interaction, query)
 
-@client.tree.command(name='poll', description='create poll')
-async def respond(interaction: discord.Interaction, question:str, option1:str, option2:str):
+@client.tree.command(name='poll', description="create poll")
+async def poll(interaction: discord.Interaction, question:str, option1:str, option2:str):
     await client.poll(interaction,question,option1,option2)
+
+@client.tree.command(name='queue', description="view queue")
+async def queue(interaction: discord.Interaction):
+    await client.queue(interaction)
+
+@client.tree.command(name='queue_add', description="add songs to queue")
+async def queue_add(interaction: discord.Interaction, song:str):
+    await client.queue_add(interaction,song)
+
+@client.tree.command(name='queue_remove', description="remove song from the queue")
+async def queue_remove(interaction: discord.Interaction, position:int):
+    await client.queue_remove(interaction,position)
+
+@client.tree.command(name='queue_clear', description="clear the queue")
+async def queue_clear(interaction: discord.Interaction):
+    await client.queue_clear(interaction)
 
 client.run('your-discord-bot-token') #insert token here
 
