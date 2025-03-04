@@ -6,3 +6,5 @@ Firstly gonna initialise the bot and setup some basic commands and functionality
 Implemented response with gemini
 
 Implemented summarize command
+
+Implemented the welcome message (with embedded)
