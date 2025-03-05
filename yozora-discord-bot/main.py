@@ -198,6 +198,30 @@ class Client(commands.Bot):
             reminders[user_id] = [r for r in user_reminders if r[2] != reminder_id]
             await interaction.followup.send(f"Reminder **ID {reminder_id}** deleted successfully")
 
+        elif action.lower() == "modify":
+            if not reminder_id or not any(r[2] == reminder_id for r in user_reminders):
+                await interaction.followup.send("Invalid reminder id", ephemeral=True)
+                return
+            
+            
+            try:
+                new_datetime = datetime.strptime(f"{date} {time}", "%Y-%m-%d %H:%M")
+                if new_datetime < datetime.now():
+                    await interaction.followup.send("Can't modify the reminder to past", ephemeral=True)
+                    return
+            except ValueError:
+                await interaction.followup.send("Invalid date or time format! Use `YYYY-MM-DD HH:MM`.", ephemeral=True)
+                return
+                
+            for i, reminder in enumerate(user_reminders):
+                if reminder[2] == reminder_id:
+                    user_reminders[i] = (new_datetime, message, reminder_id)
+                    break
+            await interaction.followup.send(f"Reminder **ID {reminder_id}** updated to `{date} {time}`: **{message}**")
+
+        else:
+            await interaction.followup.send("Invalid action! Use `create`, `list`, `delete`, or `modify`.", ephemeral=True)
+
 
 intents = discord.Intents.default()
 intents.message_content = True
