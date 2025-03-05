@@ -15,4 +15,4 @@ Implemented the music queue manage system (planning to add the player as well)
 
 Updated libraries used
 
-Implemented the reminder system with auto delete (have yet to add the modify method for it)
+Implemented the reminder system with auto delete 
